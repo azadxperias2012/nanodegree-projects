@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:showIn="@layout/activity_main"
+    tools:context=".MainActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="24dp"
+        android:layout_marginRight="24dp"
+        android:layout_marginTop="16dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:fontFamily="sans-serif-medium"
+            android:gravity="center_horizontal"
+            android:padding="4dp"
+            android:text="@string/layout_title"
+            android:textColor="#616161"
+            android:textSize="24sp" />
+
+        <Button
+            android:id="@+id/spotify_app"
+            android:text="@string/spotify_app"
+            android:onClick="displayMessage"
+            style="@style/OrangeButton" />
+
+        <Button
+            android:id="@+id/scores_app"
+            android:text="@string/scores_app"
+            android:onClick="displayMessage"
+            style="@style/OrangeButton" />
+
+        <Button
+            android:id="@+id/library_app"
+            android:text="@string/library_app"
+            android:onClick="displayMessage"
+            style="@style/OrangeButton"/>
+
+        <Button
+            android:id="@+id/build_app"
+            android:text="@string/scalable_app"
+            android:onClick="displayMessage"
+            style="@style/OrangeButton" />
+
+        <Button
+            android:id="@+id/reader_app"
+            android:text="@string/reader_app"
+            android:onClick="displayMessage"
+            style="@style/OrangeButton" />
+
+        <Button
+            android:id="@+id/capstone_app"
+            android:text="@string/capstone_app"
+            android:onClick="displayMessage"
+            style="@style/RedButton" />
+
+    </LinearLayout>
+
+</RelativeLayout>
