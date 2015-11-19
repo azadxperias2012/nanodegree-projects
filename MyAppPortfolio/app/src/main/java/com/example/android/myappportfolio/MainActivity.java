@@ -51,18 +51,26 @@ public class MainActivity extends AppCompatActivity {
             context = getApplicationContext();
         }
 
-        if(view.getId() == R.id.spotify_app) {
-            text = getString(R.string.spotify_message);
-        } else if(view.getId() == R.id.scores_app) {
-            text = getString(R.string.scores_message);
-        } else if(view.getId() == R.id.library_app) {
-            text = getString(R.string.library_message);
-        } else if(view.getId() == R.id.build_app) {
-            text = getString(R.string.build_big_message);
-        } else if(view.getId() == R.id.reader_app) {
-            text = getString(R.string.reader_message);
-        } else if(view.getId() == R.id.capstone_app) {
-            text = getString(R.string.capstone_message);
+        switch (view.getId()) {
+            case R.id.spotify_app:
+                text = getString(R.string.spotify_message);
+                break;
+            case R.id.scores_app:
+                text = getString(R.string.scores_message);
+                break;
+            case R.id.library_app:
+                text = getString(R.string.library_message);
+                break;
+            case R.id.build_app:
+                text = getString(R.string.build_big_message);
+                break;
+            case R.id.reader_app:
+                text = getString(R.string.reader_message);
+                break;
+            case R.id.capstone_app:
+                text = getString(R.string.capstone_message);
+                break;
+
         }
 
         // make and show toast message
