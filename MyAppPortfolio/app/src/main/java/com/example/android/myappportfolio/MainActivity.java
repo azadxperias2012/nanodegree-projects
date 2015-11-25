@@ -52,8 +52,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
         switch (view.getId()) {
-            case R.id.spotify_app:
-                text = getString(R.string.spotify_message);
+            case R.id.movies_app:
+                text = getString(R.string.movies_message);
                 break;
             case R.id.scores_app:
                 text = getString(R.string.scores_message);

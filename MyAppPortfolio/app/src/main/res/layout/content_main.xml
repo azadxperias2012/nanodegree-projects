@@ -35,8 +35,8 @@
                 android:textSize="24sp" />
 
             <Button
-                android:id="@+id/spotify_app"
-                android:text="@string/spotify_app"
+                android:id="@+id/movies_app"
+                android:text="@string/movies_app"
                 android:onClick="displayMessage"
                 style="@style/OrangeButton" />
 
