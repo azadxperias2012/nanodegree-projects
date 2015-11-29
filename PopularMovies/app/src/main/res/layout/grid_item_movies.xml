@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:minHeight="?android:attr/listPreferredItemHeight">
+    <ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="185dp"
+        android:layout_height="257dp"
+        android:scaleType="centerCrop"
+        android:src="#FF0000"
+        android:id="@+id/grid_item_movies_textview">
+    </ImageView>
+</LinearLayout>

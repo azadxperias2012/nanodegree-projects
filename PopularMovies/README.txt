@@ -1,0 +1,1 @@
+NOTE : Add the movie db API KEY to "TheMovieDBApiKey" in the "gradle.properties" files
