@@ -14,6 +14,9 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
 public class DetailActivity extends AppCompatActivity {
 
     @Override
@@ -53,41 +56,40 @@ public class DetailActivity extends AppCompatActivity {
 
     public static class DetailFragment extends Fragment {
 
+        @Bind(R.id.detail_movies_image_view) ImageView imageView;
+        @Bind(R.id.detail_movie_title) TextView movieTitleTextView;
+        @Bind(R.id.detail_movie_release_date) TextView movieReleaseDateTextView;
+        @Bind(R.id.detail_movie_rating) TextView movieRatingTextView;
+        @Bind(R.id.detail_movie_Plot) TextView moviePlotTextView;
+
         public DetailFragment() {
         }
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
+            ButterKnife.bind(this, rootView);
             Intent intent = getActivity().getIntent();
             MoviesData moviesData = (MoviesData) intent.getSerializableExtra(MoviesActivity.EXTRA_MESSAGE);
-            setDetailLayoutViews(moviesData, rootView);
+            setDetailLayoutViews(moviesData);
             return rootView;
         }
 
-        private void setDetailLayoutViews(MoviesData moviesData, View rootView) {
+        private void setDetailLayoutViews(MoviesData moviesData) {
             String imagePath = moviesData.getMoviePosterPath();
             StringBuilder moviePosterUrlBuilder = new StringBuilder(MoviesData.MOVIE_POSTER_URL);
             moviePosterUrlBuilder.append(imagePath);
 
-            ImageView imageView = (ImageView) rootView.findViewById(R.id.detail_movies_image_view);
             Picasso.with(this.getContext())
                     .load(moviePosterUrlBuilder.toString())
                     .placeholder(R.drawable.no_poster)
                     .error(R.drawable.no_poster)
                     .into(imageView);
 
-            TextView textView = (TextView) rootView. findViewById(R.id.detail_movie_title);
-            textView.setText(moviesData.getMovieTitle());
-
-            textView = (TextView) rootView. findViewById(R.id.detail_movie_release_date);
-            textView.setText(moviesData.getMovieReleaseDate());
-
-            textView = (TextView) rootView. findViewById(R.id.detail_movie_rating);
-            textView.setText(moviesData.getMovieRating().toString());
-
-            textView = (TextView) rootView. findViewById(R.id.detail_movie_Plot);
-            textView.setText(moviesData.getMoviePlot());
+            movieTitleTextView.setText(moviesData.getMovieTitle());
+            movieReleaseDateTextView.setText(moviesData.getMovieReleaseDate());
+            movieRatingTextView.setText(moviesData.getMovieRating().toString());
+            moviePlotTextView.setText(moviesData.getMoviePlot());
         }
     }
 }
