@@ -67,7 +67,11 @@ public class MovieDataAdapter extends ArrayAdapter<MoviesData> {
         }
         StringBuilder moviePosterUrlBuilder = new StringBuilder(MoviesData.MOVIE_POSTER_URL);
         moviePosterUrlBuilder.append(imagePath);
-        Picasso.with(this.getContext()).load(moviePosterUrlBuilder.toString()).into(imageView);
+        Picasso.with(this.getContext())
+                .load(moviePosterUrlBuilder.toString())
+                .placeholder(R.drawable.no_poster)
+                .error(R.drawable.no_poster)
+                .into(imageView);
 
         return view;
     }

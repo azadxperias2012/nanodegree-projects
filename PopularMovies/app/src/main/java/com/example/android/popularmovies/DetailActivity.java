@@ -71,7 +71,11 @@ public class DetailActivity extends AppCompatActivity {
             moviePosterUrlBuilder.append(imagePath);
 
             ImageView imageView = (ImageView) rootView.findViewById(R.id.detail_movies_image_view);
-            Picasso.with(this.getContext()).load(moviePosterUrlBuilder.toString()).into(imageView);
+            Picasso.with(this.getContext())
+                    .load(moviePosterUrlBuilder.toString())
+                    .placeholder(R.drawable.no_poster)
+                    .error(R.drawable.no_poster)
+                    .into(imageView);
 
             TextView textView = (TextView) rootView. findViewById(R.id.detail_movie_title);
             textView.setText(moviesData.getMovieTitle());
