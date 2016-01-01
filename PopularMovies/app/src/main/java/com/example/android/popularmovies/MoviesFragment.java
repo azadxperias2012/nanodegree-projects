@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -30,6 +31,17 @@ import java.util.List;
 public class MoviesFragment extends Fragment {
 
     private MovieDataAdapter mMoviesAdapter;
+    private List<MoviesData> popularMoviesList = null;
+    private static MoviesFragment movieFragment = null;
+
+    public static MoviesFragment newInstance() {
+        if(movieFragment == null) {
+            movieFragment = new MoviesFragment();
+            Bundle args = new Bundle();
+            movieFragment.setArguments(args);
+        }
+        return movieFragment;
+    }
 
     public MoviesFragment() {
     }
@@ -37,6 +49,14 @@ public class MoviesFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //popularMoviesList = null;
+        String sortOrder = getSortOrder();
+        popularMoviesList = (List<MoviesData>)getArguments().get(sortOrder);
+    }
+
+    private String getSortOrder() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        return prefs.getString(getString(R.string.pref_sort_key), getString(R.string.pref_sort_popular));
     }
 
     @Override
@@ -71,13 +91,27 @@ public class MoviesFragment extends Fragment {
         return rootView;
     }
 
-    private void updateMovies() {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String sortOrder = prefs.getString(getString(R.string.pref_sort_key), getString(R.string.pref_sort_popular));
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        if(popularMoviesList != null) {
+            String sortOrder = getSortOrder();
+            getArguments().putParcelableArrayList(sortOrder, (ArrayList<? extends Parcelable>) popularMoviesList);
+        }
+        super.onSaveInstanceState(outState);
+    }
 
-        FetchMoviesTask moviesTask = new FetchMoviesTask();
-        // Execute the task with the retrieved sort preference value.
-        moviesTask.execute(sortOrder);
+
+    private void updateMovies() {
+        String sortOrder = getSortOrder();
+        if((popularMoviesList != null) && (!popularMoviesList.isEmpty())) {
+            mMoviesAdapter.clear();
+            mMoviesAdapter.addAll(popularMoviesList);
+        }
+        else {
+            FetchMoviesTask moviesTask = new FetchMoviesTask();
+            // Execute the task with the retrieved sort preference value.
+            moviesTask.execute(sortOrder);
+        }
     }
 
     private class FetchMoviesTask extends AsyncTask<String, Void, MoviesData[]>{
@@ -172,9 +206,11 @@ public class MoviesFragment extends Fragment {
         protected void onPostExecute(MoviesData[] result) {
             if(result != null) {
                 mMoviesAdapter.clear();
+                popularMoviesList = new ArrayList<MoviesData>();
                 for(MoviesData movies : result) {
-                    mMoviesAdapter.add(movies);
+                    popularMoviesList.add(movies);
                 }
+                mMoviesAdapter.addAll(popularMoviesList);
             }
         }
 

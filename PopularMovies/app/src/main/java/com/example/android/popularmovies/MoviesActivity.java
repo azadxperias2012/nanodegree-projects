@@ -21,7 +21,7 @@ public class MoviesActivity extends AppCompatActivity {
 
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.frame_container, new MoviesFragment())
+                    .add(R.id.frame_container, MoviesFragment.newInstance())
                     .commit();
         }
     }

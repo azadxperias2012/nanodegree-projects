@@ -1,11 +1,12 @@
 package com.example.android.popularmovies;
 
-import java.io.Serializable;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 /**
  * Created by aabbasal on 11/29/2015.
  */
-public class MoviesData implements Serializable{
+public class MoviesData implements Parcelable{
 
     public static final String MOVIE_POSTER_URL = "http://image.tmdb.org/t/p/w185/";
 
@@ -71,5 +72,42 @@ public class MoviesData implements Serializable{
 
     public void setMovieId(long movieId) {
         this.movieId = movieId;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(movieId);
+        dest.writeString(movieTitle);
+        dest.writeString(movieReleaseDate);
+        dest.writeString(moviePosterPath);
+        dest.writeString(moviePlot);
+        dest.writeDouble(movieRating);
+    }
+
+    public static final Parcelable.Creator<MoviesData> CREATOR = new Parcelable.Creator<MoviesData>() {
+
+        @Override
+        public MoviesData createFromParcel(Parcel source) {
+            return new MoviesData(source);
+        }
+
+        @Override
+        public MoviesData[] newArray(int size) {
+            return new MoviesData[size];
+        }
+    };
+
+    private MoviesData(Parcel source) {
+        movieId = source.readLong();
+        movieTitle = source.readString();
+        movieReleaseDate = source.readString();
+        moviePosterPath = source.readString();
+        moviePlot = source.readString();
+        movieRating = source.readDouble();
     }
 }

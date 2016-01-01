@@ -70,7 +70,7 @@ public class DetailActivity extends AppCompatActivity {
             View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
             ButterKnife.bind(this, rootView);
             Intent intent = getActivity().getIntent();
-            MoviesData moviesData = (MoviesData) intent.getSerializableExtra(MoviesActivity.EXTRA_MESSAGE);
+            MoviesData moviesData = intent.getParcelableExtra(MoviesActivity.EXTRA_MESSAGE);
             setDetailLayoutViews(moviesData);
             return rootView;
         }
