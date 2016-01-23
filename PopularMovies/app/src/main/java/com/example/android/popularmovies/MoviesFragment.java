@@ -1,19 +1,25 @@
 package com.example.android.popularmovies;
 
-import android.content.Intent;
+import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
+
+import com.example.android.popularmovies.data.MovieDataProvider;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -28,40 +34,54 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MoviesFragment extends Fragment {
+public class MoviesFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+    private static final int CURSOR_LOADER_ID = 0;
+    private static final String LOG_TAG = MoviesFragment.class.getSimpleName();
 
     private MovieDataAdapter mMoviesAdapter;
     private List<MoviesData> popularMoviesList = null;
-    private static MoviesFragment movieFragment = null;
+    private FavouriteMoviesCursorAdapter mFavouriteMoviesCursorAdapter = null;
+    private Bundle mSavedMovieList;
 
-    public static MoviesFragment newInstance() {
-        if(movieFragment == null) {
-            movieFragment = new MoviesFragment();
-            Bundle args = new Bundle();
-            movieFragment.setArguments(args);
-        }
-        return movieFragment;
+    /**
+     * A callback interface that all activities containing this fragment must
+     * implement. This mechanism allows activities to be notified of item
+     * selections.
+     */
+    public interface Callback {
+        /**
+         * DetailFragmentCallback for when an item has been selected.
+         */
+        public void onItemSelected(MoviesData moviesData);
     }
 
     public MoviesFragment() {
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        //popularMoviesList = null;
+    public void onActivityCreated(Bundle savedInstanceState) {
         String sortOrder = getSortOrder();
-        popularMoviesList = (List<MoviesData>)getArguments().get(sortOrder);
+        if(getString(R.string.pref_sort_favourite).equals(sortOrder)) {
+            popularMoviesList = getFavoritesMovieData(getActivity());
+            updateMovies(sortOrder);
+        }
+
+        getLoaderManager().initLoader(CURSOR_LOADER_ID, null, this);
+        super.onActivityCreated(savedInstanceState);
     }
 
-    private String getSortOrder() {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        return prefs.getString(getString(R.string.pref_sort_key), getString(R.string.pref_sort_popular));
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d(LOG_TAG, "resume called");
+        getLoaderManager().restartLoader(CURSOR_LOADER_ID, null, this);
     }
 
     @Override
     public View onCreateView(final LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        mSavedMovieList = new Bundle();
 
         // Create an empty list for the GridView.
         List<MoviesData> popularMovies = new ArrayList<MoviesData>();
@@ -70,6 +90,8 @@ public class MoviesFragment extends Fragment {
                 getActivity(),
                 R.layout.grid_item_movies,
                 R.id.grid_item_movies_textview, popularMovies);
+
+        mFavouriteMoviesCursorAdapter = new FavouriteMoviesCursorAdapter(getActivity(), null, 0);
 
         View rootView = inflater.inflate(R.layout.fagment_movies, container, false);
 
@@ -80,13 +102,13 @@ public class MoviesFragment extends Fragment {
         moviesGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(getActivity(), DetailActivity.class);
-                intent.putExtra(MoviesActivity.EXTRA_MESSAGE, mMoviesAdapter.getItem(position));
-                startActivity(intent);
+                ((Callback) getActivity())
+                        .onItemSelected(mMoviesAdapter.getItem(position));
             }
         });
 
-        updateMovies();
+        String sortOrder = getSortOrder();
+        updateMovies(sortOrder);
 
         return rootView;
     }
@@ -95,23 +117,76 @@ public class MoviesFragment extends Fragment {
     public void onSaveInstanceState(Bundle outState) {
         if(popularMoviesList != null) {
             String sortOrder = getSortOrder();
-            getArguments().putParcelableArrayList(sortOrder, (ArrayList<? extends Parcelable>) popularMoviesList);
+            mSavedMovieList.putParcelableArrayList(sortOrder,
+                    (ArrayList<? extends Parcelable>) popularMoviesList);
         }
         super.onSaveInstanceState(outState);
     }
 
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        return new CursorLoader(getActivity(), MovieDataProvider.Movies.CONTENT_URI,
+                null,
+                null,
+                null,
+                null);
+    }
 
-    private void updateMovies() {
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        mFavouriteMoviesCursorAdapter.swapCursor(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mFavouriteMoviesCursorAdapter.swapCursor(null);
+    }
+
+    public void onSortOrderChanged() {
+        popularMoviesList = null;
         String sortOrder = getSortOrder();
+        if(getString(R.string.pref_sort_favourite).equals(sortOrder)) {
+            popularMoviesList = getFavoritesMovieData(getActivity());
+            if(popularMoviesList == null) {
+                mMoviesAdapter.clear();
+            }
+        } else {
+            popularMoviesList = mSavedMovieList.getParcelableArrayList(sortOrder);
+        }
+        updateMovies(sortOrder);
+    }
+
+    private void updateMovies(String sortOrder) {
         if((popularMoviesList != null) && (!popularMoviesList.isEmpty())) {
             mMoviesAdapter.clear();
             mMoviesAdapter.addAll(popularMoviesList);
-        }
-        else {
+        } else if(!sortOrder.equals(getString(R.string.pref_sort_favourite))) {
             FetchMoviesTask moviesTask = new FetchMoviesTask();
             // Execute the task with the retrieved sort preference value.
             moviesTask.execute(sortOrder);
         }
+    }
+
+    private List<MoviesData> getFavoritesMovieData(Context context) {
+        List<MoviesData> favoriteMoviesList = null;
+        Cursor c = context.getContentResolver().query(MovieDataProvider.Movies.CONTENT_URI,
+                null, null, null, null);
+
+        if (c != null && c.getCount() > 0) {
+            if (c.moveToFirst()) {
+                favoriteMoviesList = new ArrayList<MoviesData>();
+                do {
+                    favoriteMoviesList.add(MoviesData.getMoviesDataFromCursor(c));
+                } while (c.moveToNext());
+            }
+            c.close();
+        }
+        return favoriteMoviesList;
+    }
+
+    private String getSortOrder() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        return prefs.getString(getString(R.string.pref_sort_key), getString(R.string.pref_sort_popular));
     }
 
     private class FetchMoviesTask extends AsyncTask<String, Void, MoviesData[]>{

@@ -1,7 +1,10 @@
 package com.example.android.popularmovies;
 
+import android.database.Cursor;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.example.android.popularmovies.data.MovieDataColumns;
 
 /**
  * Created by aabbasal on 11/29/2015.
@@ -110,4 +113,18 @@ public class MoviesData implements Parcelable{
         moviePlot = source.readString();
         movieRating = source.readDouble();
     }
+
+    public static MoviesData getMoviesDataFromCursor(Cursor cursor) {
+
+        String movieId = cursor.getString(cursor.getColumnIndex(MovieDataColumns.MOVIE_ID));
+        String movieTitle = cursor.getString(cursor.getColumnIndex(MovieDataColumns.MOVIE_TITLE));
+        String movieReleaseDate = cursor.getString(cursor.getColumnIndex(MovieDataColumns.MOVIE_RELEASE_DATE));
+        String moviePosterPath = cursor.getString(cursor.getColumnIndex(MovieDataColumns.MOVIE_POSTER_PATH));
+        String moviePlot = cursor.getString(cursor.getColumnIndex(MovieDataColumns.MOVIE_PLOT));
+        String movieRating = cursor.getString(cursor.getColumnIndex(MovieDataColumns.MOVIE_RATING));
+
+        return new MoviesData(Long.parseLong(movieId), movieTitle, movieReleaseDate,
+                moviePosterPath, moviePlot, Double.parseDouble(movieRating));
+    }
+
 }
