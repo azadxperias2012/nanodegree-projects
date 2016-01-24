@@ -3,6 +3,8 @@ package com.example.android.popularmovies;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -18,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.Toast;
 
 import com.example.android.popularmovies.data.MovieDataProvider;
 
@@ -61,7 +64,7 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         String sortOrder = getSortOrder();
-        if(getString(R.string.pref_sort_favourite).equals(sortOrder)) {
+        if (getString(R.string.pref_sort_favourite).equals(sortOrder)) {
             popularMoviesList = getFavoritesMovieData(getActivity());
             updateMovies(sortOrder);
         }
@@ -73,7 +76,6 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onResume() {
         super.onResume();
-        Log.d(LOG_TAG, "resume called");
         getLoaderManager().restartLoader(CURSOR_LOADER_ID, null, this);
     }
 
@@ -82,6 +84,10 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
                              Bundle savedInstanceState) {
 
         mSavedMovieList = new Bundle();
+
+        if(savedInstanceState != null) {
+            popularMoviesList = savedInstanceState.getParcelableArrayList(getSortOrder());
+        }
 
         // Create an empty list for the GridView.
         List<MoviesData> popularMovies = new ArrayList<MoviesData>();
@@ -96,7 +102,7 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
         View rootView = inflater.inflate(R.layout.fagment_movies, container, false);
 
         // Create a GridView and assign the ImageAdapter
-        GridView moviesGridView = (GridView)rootView.findViewById(R.id.movies_grid_view);
+        GridView moviesGridView = (GridView) rootView.findViewById(R.id.movies_grid_view);
         moviesGridView.setAdapter(mMoviesAdapter);
 
         moviesGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -115,9 +121,11 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        if(popularMoviesList != null) {
+        if (popularMoviesList != null) {
             String sortOrder = getSortOrder();
             mSavedMovieList.putParcelableArrayList(sortOrder,
+                    (ArrayList<? extends Parcelable>) popularMoviesList);
+            outState.putParcelableArrayList(sortOrder,
                     (ArrayList<? extends Parcelable>) popularMoviesList);
         }
         super.onSaveInstanceState(outState);
@@ -145,9 +153,9 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
     public void onSortOrderChanged() {
         popularMoviesList = null;
         String sortOrder = getSortOrder();
-        if(getString(R.string.pref_sort_favourite).equals(sortOrder)) {
+        if (getString(R.string.pref_sort_favourite).equals(sortOrder)) {
             popularMoviesList = getFavoritesMovieData(getActivity());
-            if(popularMoviesList == null) {
+            if (popularMoviesList == null) {
                 mMoviesAdapter.clear();
             }
         } else {
@@ -157,13 +165,17 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
     }
 
     private void updateMovies(String sortOrder) {
-        if((popularMoviesList != null) && (!popularMoviesList.isEmpty())) {
+        if ((popularMoviesList != null) && (!popularMoviesList.isEmpty())) {
             mMoviesAdapter.clear();
             mMoviesAdapter.addAll(popularMoviesList);
-        } else if(!sortOrder.equals(getString(R.string.pref_sort_favourite))) {
-            FetchMoviesTask moviesTask = new FetchMoviesTask();
-            // Execute the task with the retrieved sort preference value.
-            moviesTask.execute(sortOrder);
+        } else if (!sortOrder.equals(getString(R.string.pref_sort_favourite))) {
+            if(isNetworkAvailable()) {
+                FetchMoviesTask moviesTask = new FetchMoviesTask();
+                // Execute the task with the retrieved sort preference value.
+                moviesTask.execute(sortOrder);
+            } else {
+                Toast.makeText(getActivity(), R.string.network_not_connected, Toast.LENGTH_LONG).show();
+            }
         }
     }
 
@@ -189,7 +201,14 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
         return prefs.getString(getString(R.string.pref_sort_key), getString(R.string.pref_sort_popular));
     }
 
-    private class FetchMoviesTask extends AsyncTask<String, Void, MoviesData[]>{
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getActivity()
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return (activeNetworkInfo != null && activeNetworkInfo.isConnected());
+    }
+
+    private class FetchMoviesTask extends AsyncTask<String, Void, MoviesData[]> {
 
         private String LOG_TAG = FetchMoviesTask.class.getSimpleName();
 
@@ -210,7 +229,7 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
                 final String SORT_PARAM = "sort_by";
 
                 Uri builtUri = null;
-                if(params[0].equalsIgnoreCase(getString(R.string.pref_sort_top_rated))) {
+                if (params[0].equalsIgnoreCase(getString(R.string.pref_sort_top_rated))) {
                     builtUri = Uri.parse(MOVIE_DB_TOP_RATED_URL).buildUpon()
                             .appendQueryParameter(API_KEY_PARAM, BuildConfig.THE_MOVIE_DB_API_KEY)
                             .build();
@@ -231,7 +250,7 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
 
                 InputStream inputStream = urlConnection.getInputStream();
                 StringBuffer buffer = new StringBuffer();
-                if(inputStream == null) {
+                if (inputStream == null) {
                     moviesJsonStr = null;
                 }
                 reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -256,7 +275,7 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
                 // to parse it.
                 moviesJsonStr = null;
             } finally {
-                if(urlConnection != null) {
+                if (urlConnection != null) {
                     urlConnection.disconnect();
                 }
                 if (reader != null) {
@@ -279,10 +298,10 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
 
         @Override
         protected void onPostExecute(MoviesData[] result) {
-            if(result != null) {
+            if (result != null) {
                 mMoviesAdapter.clear();
                 popularMoviesList = new ArrayList<MoviesData>();
-                for(MoviesData movies : result) {
+                for (MoviesData movies : result) {
                     popularMoviesList.add(movies);
                 }
                 mMoviesAdapter.addAll(popularMoviesList);
@@ -290,21 +309,21 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
         }
 
         private MoviesData[] getMoviesDataFromJson(String moviesJson) throws JSONException {
-            if(moviesJson == null) {
+            if (moviesJson == null) {
                 return null;
             }
 
-            final String MOVIE_DB_RESULTS   = "results";
+            final String MOVIE_DB_RESULTS = "results";
 
             // get the json object from the given json string
             JSONObject movieDBJsonObj = new JSONObject(moviesJson);
             // find "results" array from the json object
             JSONArray resultsJsonArr = movieDBJsonObj.getJSONArray(MOVIE_DB_RESULTS);
 
-            if((resultsJsonArr != null) && (resultsJsonArr.length() > 0)) {
+            if ((resultsJsonArr != null) && (resultsJsonArr.length() > 0)) {
                 MoviesData[] moviesDataArr = new MoviesData[resultsJsonArr.length()];
 
-                for(int i = 0; i < resultsJsonArr.length(); i++) {
+                for (int i = 0; i < resultsJsonArr.length(); i++) {
                     // get individual result object from the results array
                     JSONObject resultObj = resultsJsonArr.getJSONObject(i);
                     moviesDataArr[i] = getMoviesData(resultObj);
@@ -317,11 +336,11 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
         }
 
         private MoviesData getMoviesData(JSONObject resultObj) throws JSONException {
-            final String MOVIE_TITLE        = "original_title";
+            final String MOVIE_TITLE = "original_title";
             final String MOVIE_RELEASE_DATE = "release_date";
-            final String MOVIE_POSTER_PATH  = "poster_path";
-            final String MOVIE_PLOT         = "overview";
-            final String MOVIE_RATING       = "vote_average";
+            final String MOVIE_POSTER_PATH = "poster_path";
+            final String MOVIE_PLOT = "overview";
+            final String MOVIE_RATING = "vote_average";
 
             // Create MoviesData object with the retrieved values from the JSON
             MoviesData moviesData = new MoviesData(
@@ -329,7 +348,7 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
                     resultObj.getString(MOVIE_TITLE),
                     resultObj.getString(MOVIE_RELEASE_DATE),
                     resultObj.getString(MOVIE_POSTER_PATH), resultObj.getString(MOVIE_PLOT), resultObj.getDouble(MOVIE_RATING));
-            return  moviesData;
+            return moviesData;
         }
     }
 }

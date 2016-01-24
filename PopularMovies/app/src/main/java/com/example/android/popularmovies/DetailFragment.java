@@ -10,8 +10,13 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.widget.ShareActionProvider;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -20,6 +25,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.example.android.popularmovies.data.MovieDataColumns;
@@ -38,9 +44,11 @@ import butterknife.ButterKnife;
 
 public class DetailFragment extends Fragment {
 
+    public static final String MOVIE_DETAIL = "Movie Detail";
+
     private static final int MOVIE_DATA_NOT_FOUND = -1;
     private static final String LOG_TAG = DetailFragment.class.getSimpleName();
-    public static final String MOVIE_DETAIL = "Movie Detail";
+    private static final String POPULAR_MOVIES_SHARE_HASHTAG = "#PopularMoviesApp";
 
     @Bind(R.id.detail_movies_image_view)
     ImageView imageView;
@@ -63,8 +71,10 @@ public class DetailFragment extends Fragment {
 
     private TrailerDataAdapter trailerDataAdapter;
     private ReviewDataAdapter reviewDataAdapter;
+    private ShareActionProvider mShareActionProvider = null;
 
     public DetailFragment() {
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -88,6 +98,19 @@ public class DetailFragment extends Fragment {
             rootView = inflater.inflate(R.layout.fargment_no_detail, container, false);
         }
         return rootView;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        // inflate the menu
+        inflater.inflate(R.menu.detailfragment, menu);
+
+        // Retrieve the share menu item
+        MenuItem menuItem = menu.findItem(R.id.action_share);
+
+        // Get the provider and hold onto it to set/change the share intent
+        mShareActionProvider =
+                (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
     }
 
     private void setToggleButtonState(final MoviesData moviesData) {
@@ -259,6 +282,23 @@ public class DetailFragment extends Fragment {
 
     }
 
+    private Intent createShareMovieTrailerIntent() {
+        TrailerData item = trailerDataAdapter.getItem(0);
+        if(item != null) {
+            String TRAILER_URL = "https://www.youtube.com/watch?v=%s";
+            Uri webPage = Uri.parse(String.format(TRAILER_URL, item.getTrailerKey()));
+
+            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+            shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
+            shareIntent.setType("text/plain");
+            shareIntent.putExtra(Intent.EXTRA_TEXT, webPage.toString() + POPULAR_MOVIES_SHARE_HASHTAG);
+            return shareIntent;
+        } else {
+            Toast.makeText(getActivity(), R.string.no_trailers, Toast.LENGTH_LONG).show();
+            return null;
+        }
+    }
+
     private class FetchTrailersTask extends AsyncTask<String, Void, TrailerData[]> {
 
         private String LOG_TAG = FetchTrailersTask.class.getSimpleName();
@@ -301,6 +341,12 @@ public class DetailFragment extends Fragment {
                     popularMoviesTrailers.add(trailers);
                 }
                 trailerDataAdapter.addAll(popularMoviesTrailers);
+                // Attach an intent to this ShareActionProvider.
+                if(mShareActionProvider != null) {
+                    mShareActionProvider.setShareIntent(createShareMovieTrailerIntent());
+                } else {
+                    Log.d(LOG_TAG, "Share Action Provider is null?");
+                }
             }
             Helper.getListViewSize(trailersListView);
             detailScrollView.scrollTo(0, 0);
