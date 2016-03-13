@@ -16,6 +16,7 @@ import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
 import com.sam_chordas.android.stockhawk.touch_helper.ItemTouchHelperAdapter;
 import com.sam_chordas.android.stockhawk.touch_helper.ItemTouchHelperViewHolder;
+import com.sam_chordas.android.stockhawk.utils.Utility;
 
 /**
  * Created by sam_chordas on 10/6/15.
@@ -29,10 +30,12 @@ public class QuoteCursorAdapter extends CursorRecyclerViewAdapter<QuoteCursorAda
   private static Context mContext;
   private static Typeface robotoLight;
   //private final OnStartDragListener mDragListener;
+  private final View mEmptyView;
   private boolean isPercent;
-  public QuoteCursorAdapter(Context context, Cursor cursor){
+  public QuoteCursorAdapter(Context context, Cursor cursor, View emptyView){
     super(context, cursor);
     //mDragListener = dragListener;
+    mEmptyView = emptyView;
     mContext = context;
   }
 
@@ -114,4 +117,16 @@ public class QuoteCursorAdapter extends CursorRecyclerViewAdapter<QuoteCursorAda
 
     }
   }
+
+  public Cursor swapCursor(Cursor newCursor) {
+    Cursor swapCursor = super.swapCursor(newCursor);
+    mEmptyView.setVisibility(getItemCount() == 0 ? View.VISIBLE : View.GONE);
+    if(Utility.isConnected(mContext)) {
+      ((TextView) mEmptyView).setText(mContext.getText(R.string.empty_stock_list));
+    } else {
+      ((TextView)mEmptyView).setText(mContext.getText(R.string.network_toast));
+    }
+    return swapCursor;
+  }
+
 }

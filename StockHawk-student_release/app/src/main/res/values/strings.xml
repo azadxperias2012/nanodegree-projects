@@ -11,4 +11,7 @@
   <string name="input_prefill"></string>
   <string name="widget_title">Today\'s Market</string>
   <string name="network_toast">Uh-oh! This app requires an internet connection</string>
+  <string name="add_stock_description" translatable="true">Add Stock</string>
+  <string name="outdated_stock_list">Stock Hawk list out of date</string>
+  <string name="empty_stock_list">Empty Stock list\r\nAdd a Stock Symbol to track stocks</string>
 </resources>

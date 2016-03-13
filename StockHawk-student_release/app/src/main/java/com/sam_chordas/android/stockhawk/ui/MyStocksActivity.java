@@ -80,12 +80,15 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
     recyclerView.setLayoutManager(new LinearLayoutManager(this));
     getLoaderManager().initLoader(CURSOR_LOADER_ID, null, this);
 
-    mCursorAdapter = new QuoteCursorAdapter(this, null);
+    View emptyView = findViewById(R.id.recycler_view_outdated_stock);
+
+    mCursorAdapter = new QuoteCursorAdapter(this, null, emptyView);
     recyclerView.addOnItemTouchListener(new RecyclerViewItemClickListener(this,
             new RecyclerViewItemClickListener.OnItemClickListener() {
               @Override public void onItemClick(View v, int position) {
                 //TODO:
                 // do something on item click
+                Toast.makeText(MyStocksActivity.this, "Touched an Item", Toast.LENGTH_LONG);
               }
             }));
     recyclerView.setAdapter(mCursorAdapter);
