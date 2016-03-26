@@ -1,13 +1,19 @@
 package com.sam_chordas.android.stockhawk.rest;
 
 import android.content.ContentProviderOperation;
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.util.Log;
+
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
-import java.util.ArrayList;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
 
 /**
  * Created by sam_chordas on 10/8/15.
@@ -49,11 +55,18 @@ public class Utils {
   }
 
   public static String truncateBidPrice(String bidPrice){
-    bidPrice = String.format("%.2f", Float.parseFloat(bidPrice));
+    bidPrice = String.format("%.2f",
+            (bidPrice.equalsIgnoreCase("null") != true ? Float.parseFloat(bidPrice) : 0.0));
     return bidPrice;
   }
 
   public static String truncateChange(String change, boolean isPercentChange){
+    if(change.equalsIgnoreCase("null")) {
+      change = "+0.00";
+      if(isPercentChange) {
+        change = "+0.00%";
+      }
+    }
     String weight = change.substring(0,1);
     String ampersand = "";
     if (isPercentChange){
@@ -91,5 +104,14 @@ public class Utils {
       e.printStackTrace();
     }
     return builder.build();
+  }
+
+  public static boolean isNetworkAvailable(Context context) {
+    ConnectivityManager cm =
+            (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+    NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+    return activeNetwork != null &&
+            activeNetwork.isConnectedOrConnecting();
   }
 }

@@ -98,7 +98,12 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
     fab.attachToRecyclerView(recyclerView);
     fab.setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View v) {
-        if (isConnected){
+        if (Utils.isNetworkAvailable(mContext)){
+          if(!isConnected) {
+            mServiceIntent.putExtra("tag", "init");
+            startService(mServiceIntent);
+            isConnected = true;
+          }
           new MaterialDialog.Builder(mContext).title(R.string.symbol_search)
               .content(R.string.content_test)
               .inputType(InputType.TYPE_CLASS_TEXT)
@@ -127,6 +132,8 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
               .show();
         } else {
           networkToast();
+          stopService(mServiceIntent);
+          isConnected = false;
         }
 
       }
