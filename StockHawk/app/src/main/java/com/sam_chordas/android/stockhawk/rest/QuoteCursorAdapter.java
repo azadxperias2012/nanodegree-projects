@@ -4,6 +4,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -29,9 +31,11 @@ public class QuoteCursorAdapter extends CursorRecyclerViewAdapter<QuoteCursorAda
   private static Context mContext;
   private static Typeface robotoLight;
   private boolean isPercent;
-  public QuoteCursorAdapter(Context context, Cursor cursor){
+  private final View mEmptyView;
+  public QuoteCursorAdapter(Context context, Cursor cursor, View emptyView){
     super(context, cursor);
     mContext = context;
+    mEmptyView = emptyView;
   }
 
   @Override
@@ -40,6 +44,7 @@ public class QuoteCursorAdapter extends CursorRecyclerViewAdapter<QuoteCursorAda
     View itemView = LayoutInflater.from(parent.getContext())
         .inflate(R.layout.list_item_quote, parent, false);
     ViewHolder vh = new ViewHolder(itemView);
+    ((TextView) mEmptyView).setTypeface(robotoLight);
     return vh;
   }
 
@@ -84,6 +89,23 @@ public class QuoteCursorAdapter extends CursorRecyclerViewAdapter<QuoteCursorAda
     return super.getItemCount();
   }
 
+  @Override
+  public Cursor swapCursor(Cursor newCursor) {
+    Cursor swapCursor = super.swapCursor(newCursor);
+    int stringResourceId = R.string.empty_stock_list;
+    int visibility = View.VISIBLE;
+
+    if(!isConnected() && getItemCount() != 0) {
+      stringResourceId = R.string.out_of_date_stock_list;
+    } else {
+      visibility = getItemCount() == 0 ? View.VISIBLE : View.GONE;
+    }
+
+    ((TextView) mEmptyView).setText(mContext.getString(stringResourceId));
+    mEmptyView.setVisibility(visibility);
+    return swapCursor;
+  }
+
   public static class ViewHolder extends RecyclerView.ViewHolder
       implements ItemTouchHelperViewHolder, View.OnClickListener{
     public final TextView symbol;
@@ -111,5 +133,13 @@ public class QuoteCursorAdapter extends CursorRecyclerViewAdapter<QuoteCursorAda
     public void onClick(View v) {
 
     }
+  }
+
+  private boolean isConnected() {
+    ConnectivityManager cm =
+            (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+    NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+    return (activeNetwork != null && activeNetwork.isConnectedOrConnecting());
   }
 }

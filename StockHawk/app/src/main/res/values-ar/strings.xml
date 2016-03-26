@@ -7,4 +7,6 @@
     <string name="content_test">بحث عن الأوراق المالية رمز</string>
     <string name="network_toast"><xliff:g>Uh-oh!</xliff:g> هذا التطبيق يتطلب اتصال بالإنترنت</string>
     <string name="btn_add_stock">إضافة أسهم</string>
+    <string name="empty_stock_list" translatable="true">قائمة الأسهم فارغة<xliff:g>\r\n</xliff:g>إضافة رمز السهم لتتبع الأسهم</string>
+    <string name="out_of_date_stock_list" translatable="true">قائمة الأسهم من تاريخ</string>
 </resources>
