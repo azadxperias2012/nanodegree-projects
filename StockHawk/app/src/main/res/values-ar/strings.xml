@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="http://schemas.android.com/tools">
+    <string name="action_example">العمل سبيل المثال</string>
+    <string name="action_settings">إعدادات</string>
+    <string name="action_change_units">وحدات التغيير</string>
+    <string name="symbol_search">رمز البحث</string>
+    <string name="content_test">بحث عن الأوراق المالية رمز</string>
+    <string name="network_toast"><xliff:g>Uh-oh!</xliff:g> هذا التطبيق يتطلب اتصال بالإنترنت</string>
+    <string name="btn_add_stock">إضافة أسهم</string>
+</resources>
