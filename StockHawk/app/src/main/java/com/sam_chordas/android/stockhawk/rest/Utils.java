@@ -2,12 +2,14 @@ package com.sam_chordas.android.stockhawk.rest;
 
 import android.content.ContentProviderOperation;
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
 
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
+import com.sam_chordas.android.stockhawk.ui.MyStocksActivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -100,6 +102,12 @@ public class Utils {
         builder.withValue(QuoteColumns.ISUP, 1);
       }
 
+      // Data for charting
+      builder.withValue(QuoteColumns.PREVIOUSCLOSE, truncateBidPrice(jsonObject.getString("PreviousClose")));
+      builder.withValue(QuoteColumns.OPEN, truncateBidPrice(jsonObject.getString("Open")));
+      builder.withValue(QuoteColumns.DAYSLOW, truncateBidPrice(jsonObject.getString("DaysLow")));
+      builder.withValue(QuoteColumns.DAYSHIGH, truncateBidPrice(jsonObject.getString("DaysHigh")));
+
     } catch (JSONException e){
       e.printStackTrace();
     }
@@ -113,5 +121,14 @@ public class Utils {
     NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
     return activeNetwork != null &&
             activeNetwork.isConnectedOrConnecting();
+  }
+
+  public static void updateWidgets(Context context) {
+    if(context != null) {
+      // Setting the package ensures that only components in our app will receive the broadcast
+      Intent dataUpdatedIntent = new Intent(MyStocksActivity.ACTION_DATA_UPDATED)
+              .setPackage(context.getPackageName());
+      context.sendBroadcast(dataUpdatedIntent);
+    }
   }
 }

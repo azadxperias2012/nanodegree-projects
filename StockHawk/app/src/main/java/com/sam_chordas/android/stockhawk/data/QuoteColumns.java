@@ -25,4 +25,12 @@ public class QuoteColumns {
   public static final String ISUP = "is_up";
   @DataType(DataType.Type.INTEGER) @NotNull
   public static final String ISCURRENT = "is_current";
+  @DataType(DataType.Type.TEXT) @NotNull
+  public static final String PREVIOUSCLOSE = "previous_close";
+  @DataType(DataType.Type.TEXT) @NotNull
+  public static final String OPEN = "open";
+  @DataType(DataType.Type.TEXT) @NotNull
+  public static final String DAYSLOW = "days_low";
+  @DataType(DataType.Type.TEXT) @NotNull
+  public static final String DAYSHIGH = "days_high";
 }

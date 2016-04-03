@@ -31,6 +31,7 @@ import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
 import com.sam_chordas.android.stockhawk.rest.QuoteCursorAdapter;
 import com.sam_chordas.android.stockhawk.rest.RecyclerViewItemClickListener;
+import com.sam_chordas.android.stockhawk.rest.StockDataSet;
 import com.sam_chordas.android.stockhawk.rest.Utils;
 import com.sam_chordas.android.stockhawk.service.StockIntentService;
 import com.sam_chordas.android.stockhawk.service.StockTaskService;
@@ -53,6 +54,10 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
   private Context mContext;
   private Cursor mCursor;
   boolean isConnected;
+
+  public static final String STOCK_DATA_SET = "com.sam_chordas.android.stockhawk.ui.StockDataSet";
+  public static final String ACTION_DATA_UPDATED =
+          "com.sam_chordas.android.stockhawk.ui.ACTION_DATA_UPDATED";
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -89,6 +94,26 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
               @Override public void onItemClick(View v, int position) {
                 //TODO:
                 // do something on item click
+                Cursor cursor = mCursorAdapter.getCursor();
+                cursor.moveToPosition(position);
+                String symbol = cursor.getString(cursor.getColumnIndex(QuoteColumns.SYMBOL));
+                String previousClosePrice = cursor.getString(cursor.getColumnIndex(QuoteColumns.PREVIOUSCLOSE));
+                String openPrice = cursor.getString(cursor.getColumnIndex(QuoteColumns.OPEN));
+                String bidPrice = cursor.getString(cursor.getColumnIndex(QuoteColumns.BIDPRICE));
+                String daysLowPrice = cursor.getString(cursor.getColumnIndex(QuoteColumns.DAYSLOW));
+                String daysHighPrice = cursor.getString(cursor.getColumnIndex(QuoteColumns.DAYSHIGH));
+
+                StockDataSet stockDataSet = new StockDataSet();
+                stockDataSet.setSymbol(symbol);
+                stockDataSet.setPreviousClosePrice(previousClosePrice);
+                stockDataSet.setOpenPrice(openPrice);
+                stockDataSet.setBidPrice(bidPrice);
+                stockDataSet.setDaysLowPrice(daysLowPrice);
+                stockDataSet.setDaysHighPrice(daysHighPrice);
+
+                Intent intent = new Intent(mContext, DetailStocksActivity.class);
+                intent.putExtra(STOCK_DATA_SET, stockDataSet);
+                startActivity(intent);
               }
             }));
     recyclerView.setAdapter(mCursorAdapter);
@@ -216,7 +241,9 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
     // This narrows the return to only the stocks that are most current.
     return new CursorLoader(this, QuoteProvider.Quotes.CONTENT_URI,
         new String[]{ QuoteColumns._ID, QuoteColumns.SYMBOL, QuoteColumns.BIDPRICE,
-            QuoteColumns.PERCENT_CHANGE, QuoteColumns.CHANGE, QuoteColumns.ISUP},
+            QuoteColumns.PERCENT_CHANGE, QuoteColumns.CHANGE, QuoteColumns.ISUP,
+            QuoteColumns.PREVIOUSCLOSE, QuoteColumns.OPEN, QuoteColumns.DAYSLOW,
+            QuoteColumns.DAYSHIGH},
         QuoteColumns.ISCURRENT + " = ?",
         new String[]{"1"},
         null);
