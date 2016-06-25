@@ -7,11 +7,14 @@ import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ProgressBar;
 
 import com.example.Joke;
 
 
 public class MainActivity extends ActionBarActivity {
+
+    private ProgressBar loadingIndicator = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,8 +44,34 @@ public class MainActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void tellJoke(View view){
+    public void tellJoke(View view) {
+        showLoadingIndicator();
         String joke = Joke.tellJokes();
         new EndpointsAsyncTask().execute(new Pair<Context, String>(this, joke));
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        hideLoadingIndicator();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        hideLoadingIndicator();
+    }
+
+    private void showLoadingIndicator() {
+        if(loadingIndicator == null) {
+            loadingIndicator = (ProgressBar) findViewById(R.id.loadingIndicator);
+        }
+        loadingIndicator.setVisibility(View.VISIBLE);
+    }
+
+    private void hideLoadingIndicator() {
+        if(loadingIndicator != null) {
+            loadingIndicator.setVisibility(View.GONE);
+        }
     }
 }
