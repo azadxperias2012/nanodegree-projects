@@ -24,35 +24,44 @@
     </android.support.v4.widget.SwipeRefreshLayout>
 
     <android.support.design.widget.AppBarLayout
-        android:id="@+id/toolbar_container"
+        android:id="@+id/appbar"
         android:layout_width="match_parent"
-        android:layout_height="112dp"
-        app:elevation="8dp">
+        android:layout_height="176dp"
+        android:elevation="@dimen/appbar_elevation"
+        android:fitsSystemWindows="true"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
         <android.support.design.widget.CollapsingToolbarLayout
-            android:id="@+id/main.collapsing"
+            android:id="@+id/collapsing_toolbar_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed"
             android:fitsSystemWindows="true"
-            app:contentScrim="?attr/colorPrimary">
+            app:contentScrim="?attr/colorPrimary"
+            app:expandedTitleMarginEnd="64dp"
+            app:expandedTitleMarginStart="48dp"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:contentDescription="@string/app_name"
+                android:gravity="bottom"
+                android:paddingBottom="24dp"
+                android:paddingLeft="48dp"
+                android:paddingRight="48dp"
+                android:src="@drawable/logo" />
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
-                android:layout_height="?actionBarSize"
-                android:layout_gravity="bottom"
+                android:layout_height="?android:attr/actionBarSize"
                 android:layout_marginLeft="@dimen/list_toolbar_side_margin"
                 android:layout_marginRight="@dimen/list_toolbar_side_margin"
-                app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:contentDescription="@string/app_name"
-                    android:src="@drawable/logo" />
-
-            </android.support.v7.widget.Toolbar>
+                android:elevation="@dimen/appbar_elevation"
+                app:layout_collapseMode="pin"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+                app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
 
         </android.support.design.widget.CollapsingToolbarLayout>
 
