@@ -11,13 +11,10 @@ import android.os.Bundle;
 import android.support.v13.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.transition.Slide;
 import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
-import android.view.animation.AnimationUtils;
 
 import com.example.xyzreader.R;
 import com.example.xyzreader.data.ArticleLoader;
@@ -172,13 +169,7 @@ public class ArticleDetailActivity extends AppCompatActivity
         @Override
         public Fragment getItem(int position) {
             mCursor.moveToPosition(position);
-            ArticleDetailFragment articleDetailFragment = ArticleDetailFragment.newInstance(mCursor.getLong(ArticleLoader.Query._ID));
-            Slide slide = new Slide(Gravity.BOTTOM);
-            slide.addTarget(R.id.article_body);
-            slide.setInterpolator(AnimationUtils.loadInterpolator(ArticleDetailActivity.this, android.R.interpolator.linear_out_slow_in));
-            slide.setDuration(1000);
-            articleDetailFragment.setEnterTransition(slide);
-            return articleDetailFragment;
+            return ArticleDetailFragment.newInstance(mCursor.getLong(ArticleLoader.Query._ID));
         }
 
         @Override
