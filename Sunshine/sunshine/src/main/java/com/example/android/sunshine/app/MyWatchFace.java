@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.android.myapplication;
+package com.example.android.sunshine.app;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -24,7 +24,6 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
@@ -36,10 +35,8 @@ import android.support.wearable.watchface.WatchFaceStyle;
 import android.text.format.Time;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
-import android.widget.Toast;
 
 import java.lang.ref.WeakReference;
-import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
@@ -153,7 +150,7 @@ public class MyWatchFace extends CanvasWatchFaceService {
             linePaint.setStrokeWidth(0.5f);
             linePaint.setAntiAlias(true);
 
-            weatherIcon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_full_cancel);
+            weatherIcon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_snow);
 
             mTime = new Time();
         }
