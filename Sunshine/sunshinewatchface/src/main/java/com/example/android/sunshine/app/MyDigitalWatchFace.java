@@ -155,8 +155,14 @@ public class MyDigitalWatchFace extends CanvasWatchFaceService {
                                 DataMapItem dataMapItem = DataMapItem.fromDataItem(event.getDataItem());
                                 weatherTempHigh = dataMapItem.getDataMap().getString(WEATHER_TEMP_HIGH_KEY);
                                 weatherTempLow = dataMapItem.getDataMap().getString(WEATHER_TEMP_LOW_KEY);
-                                Asset photo = dataMapItem.getDataMap().getAsset(WEATHER_TEMP_ICON_KEY);
-                                weatherTempIcon = loadBitmapFromAsset(googleApiClient, photo);
+                                final Asset photo = dataMapItem.getDataMap().getAsset(WEATHER_TEMP_ICON_KEY);
+                                new Thread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        weatherTempIcon = loadBitmapFromAsset(googleApiClient, photo);
+                                    }
+                                }).start();
+//                                weatherTempIcon = loadBitmapFromAsset(googleApiClient, photo);
                             } catch (Exception e) {
                                 Log.e(TAG, "Exception   ", e);
                                 weatherTempIcon = null;
